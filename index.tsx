@@ -1,0 +1,1 @@
+// Interface principal (já definida anteriormente, substituída no deploy)
