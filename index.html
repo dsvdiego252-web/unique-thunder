@@ -1,92 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Unique Thunder — Camisetas</title>
-  <link rel="icon" href="assets/logo.svg">
-  <link rel="stylesheet" href="style.css" />
-  <meta name="description" content="Unique Thunder — seu novo conceito de camisetas."/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unique Thunder — Loja Oficial</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0b0b0b;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+
+    header {
+      padding: 20px;
+      background: #111;
+      border-bottom: 2px solid #222;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: #ff2ba6;
+    }
+
+    p.subtitle {
+      color: #ccc;
+      margin-top: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .card {
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .thumb {
+      width: 160px;
+      height: 160px;
+      background: #0f0f0f;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .thumb img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+    }
+
+    h3 {
+      margin: 8px 0 4px;
+    }
+
+    .price {
+      color: #00ff99;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .cep-input {
+      margin: 15px 0;
+      background: #0f0f0f;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px;
+      width: 180px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    button {
+      background: linear-gradient(90deg, #ff2ba6, #7a4dff);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      border-top: 1px solid #222;
+      padding: 20px;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    .frete {
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .frete-gratis {
+      color: #00ff99;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner container">
-      <div class="brand">
-        <img src="assets/logo.svg" width="36" height="36" alt="Unique Thunder logo"/>
-        <span>Unique Thunder</span>
-      </div>
-      <nav class="nav">
-        <a href="#produtos">Produtos</a>
-        <a href="#sobre">Sobre</a>
-        <a href="#contato">Contato</a>
-      </nav>
-      <button id="cartButton" class="cart-btn" aria-label="Abrir carrinho">
-        🛒 <span id="cartCount">0</span>
-      </button>
-    </div>
+  <header>
+    <h1>⚡ Unique Thunder</h1>
+    <p class="subtitle">Estilo e atitude em cada detalhe</p>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Seu novo conceito de camiseta</h1>
-      <p>Estampas autorais, qualidade premium e envio para todo o Brasil.</p>
-      <a class="cta" href="#produtos">Ver coleção</a>
-    </section>
+  <main>
+    <section class="grid" id="products">
+      <div class="card">
+        <div class="thumb">
+          <img src="assets/logo.svg" alt="Camisa Preta">
+        </div>
+        <h3>Camisa Preta Unique Thunder</h3>
+        <p class="price">R$ 129,90</p>
+        <input type="text" id="cep1" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
+        <p id="frete1" class="frete"></p>
+        <button onclick="buyProduct('Camisa Preta Unique Thunder', 129.90, 'cep1', 'frete1')">Comprar agora</button>
+      </div>
 
-    <section id="produtos" class="products">
-      <h2>Coleção</h2>
-      <div id="productGrid" class="grid"></div>
-    </section>
+      <div class="card">
+        <div class="thumb">
+          <img src="assets/logo.svg" alt="Moletom Thunder">
+        </div>
+        <h3>Moletom Thunder Premium</h3>
+        <p class="price">R$ 189,90</p>
+        <input type="text" id="cep2" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
+        <p id="frete2" class="frete"></p>
+        <button onclick="buyProduct('Moletom Thunder Premium', 189.90, 'cep2', 'frete2')">Comprar agora</button>
+      </div>
 
-    <section id="sobre" class="about">
-      <h2>Sobre a Unique Thunder</h2>
-      <p>Marca independente de camisetas com design original. Produção sob demanda e controle de qualidade rigoroso em cada peça.</p>
-    </section>
+      <div class="card">
+        <div class="thumb">
+          <img src="assets/logo.svg" alt="Boné Thunder">
+        </div>
+        <h3>Boné Thunder Snapback</h3>
+        <p class="price">R$ 99,90</p>
+        <input type="text" id="cep3" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
+        <p id="frete3" class="frete"></p>
+        <button onclick="buyProduct('Boné Thunder Snapback', 99.90, 'cep3', 'frete3')">Comprar agora</button>
+      </div>
 
-    <section id="contato" class="contact">
-      <h2>Contato</h2>
-      <ul>
-        <li>Email: <a href="mailto:dsv.diego@hotmail.com">dsv.diego@hotmail.com</a></li>
-        <li>Instagram: <a href="https://www.instagram.com/useuniquethunder" target="_blank" rel="noopener">useuniquethunder</a></li>
-        <li>CEP de origem: 14412-466 (Franca/SP)</li>
-      </ul>
+      <div class="card">
+        <div class="thumb">
+          <img src="assets/logo.svg" alt="Kit 3 Camisetas">
+        </div>
+        <h3>Kit 3 Camisetas Unique Thunder</h3>
+        <p class="price">R$ 329,90</p>
+        <input type="text" id="cep4" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
+        <p id="frete4" class="frete"></p>
+        <button onclick="buyProduct('Kit 3 Camisetas Unique Thunder', 329.90, 'cep4', 'frete4')">Comprar agora</button>
+      </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <small>© <span id="year"></span> Unique Thunder. Todos os direitos reservados.</small>
-    </div>
+  <footer>
+    © <span id="year"></span> Unique Thunder — Todos os direitos reservados.
   </footer>
 
-  <!-- Carrinho lateral -->
-  <aside id="cartPanel" class="cart-panel" aria-hidden="true">
-    <div class="cart-header">
-      <h3>Carrinho</h3>
-      <button id="closeCart" aria-label="Fechar carrinho">✕</button>
-    </div>
-    <div id="cartItems" class="cart-items"></div>
-    <div class="cart-summary">
-      <div class="row">
-        <span>Subtotal</span><strong id="subtotal">R$ 0,00</strong>
-      </div>
-      <div class="row">
-        <label for="cep">CEP</label>
-        <input id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9">
-      </div>
-      <div class="row">
-        <span>Frete</span><strong id="frete">R$ 0,00</strong>
-      </div>
-      <div class="row total">
-        <span>Total</span><strong id="total">R$ 0,00</strong>
-      </div>
-      <button id="checkout" class="checkout-btn">Finalizar compra</button>
-    </div>
-  </aside>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-  <div id="backdrop" class="backdrop" hidden></div>
+    // Cálculo de frete com regra de frete grátis
+    function calcFrete(cep, price) {
+      cep = cep.replace(/\D/g, "");
+      if (cep.length !== 8) return null;
 
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+      // Frete grátis acima de 299
+      if (price >= 299) return 0;
+
+      const faixa1 = { inicio: 1000000, fim: 19999999, valor: 24.90 }; // SP
+      const faixa2 = { inicio: 20000000, fim: 39999999, valor: 29.90 }; // RJ/MG
+      const faixa3 = { inicio: 40000000, fim: 99999999, valor: 34.90 }; // outros
+
+      const cepNum = parseInt(cep, 10);
+      if (cepNum >= faixa1.inicio && cepNum <= faixa1.fim) return faixa1.valor;
+      if (cepNum >= faixa2.inicio && cepNum <= faixa2.fim) return faixa2.valor;
+      return faixa3.valor;
+    }
+
+    async function buyProduct(description, price, cepId, freteId) {
+      const cepInput = document.getElementById(cepId);
+      const freteEl = document.getElementById(freteId);
+      const cep = cepInput.value.trim();
+
+      const valorFrete = calcFrete(cep, price);
+      if (valorFrete === null) {
+        alert("Por favor, digite um CEP válido antes de continuar.");
+        return;
+      }
+
+      // Exibir mensagem do frete
+      if (valorFrete === 0) {
+        freteEl.innerHTML = "<span class='frete-gratis'>Frete grátis 🚀</span>";
+      } else {
+        freteEl.textContent = "Frete: R$ " + valorFrete.toFixed(2);
+      }
+
+      const total = price + valorFrete;
+
+      try {
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description, total })
+        });
+
+        const data = await response.json();
+
+        if (data.init_point) {
+          window.location.href = data.init_point;
+        } else {
+          alert("Erro ao criar pagamento: " + (data.error || "verifique configuração"));
+        }
+      } catch (err) {
+        alert("Falha de conexão: " + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
