@@ -1,343 +1,102 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unique Thunder — Loja Oficial</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unique Thunder - Estilo e atitude em cada detalhe</title>
   <style>
     body {
-      margin: 0;
-      background-color: #0b0b0b;
+      font-family: 'Arial', sans-serif;
+      background-color: #0d0d0d;
       color: #fff;
-      font-family: Arial, Helvetica, sans-serif;
       text-align: center;
+      margin: 0;
+      padding: 0;
     }
-
-    header {
+    h1 {
+      color: #ff00cc;
+      margin-top: 40px;
+    }
+    .product {
+      background-color: #1a1a1a;
+      border-radius: 16px;
+      width: 320px;
+      margin: 30px auto;
       padding: 20px;
-      background: #111;
-      border-bottom: 2px solid #222;
+      box-shadow: 0 0 15px rgba(255, 0, 150, 0.2);
     }
-
-    header h1 {
-      font-size: 2rem;
-      margin: 0;
-      color: #ff2ba6;
+    img {
+      width: 100%;
+      border-radius: 12px;
     }
-
-    p.subtitle {
-      color: #ccc;
-      margin-top: 6px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      padding: 40px;
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    .card {
-      background: #161616;
-      border: 1px solid #222;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 0 12px rgba(255,255,255,0.05);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: scale(1.03);
-    }
-
-    .thumb {
-      width: 160px;
-      height: 160px;
-      background: #0f0f0f;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-    }
-
-    .thumb img {
-      width: 80%;
-      height: 80%;
-      object-fit: contain;
-    }
-
-    h3 {
-      margin: 8px 0 4px;
-    }
-
-    .price {
-      color: #00ff99;
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-
-    .size-options {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .size {
-      background: #0f0f0f;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 8px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    .size.active {
-      background: #ff2ba6;
-      border-color: #ff2ba6;
-    }
-
-    .cep-input, .qty-input {
-      background: #0f0f0f;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #fff;
+    select, button {
+      margin-top: 10px;
       padding: 10px;
-      width: 180px;
-      font-size: 1rem;
-      text-align: center;
-      margin: 10px 0;
-    }
-
-    button {
-      background: linear-gradient(90deg, #ff2ba6, #7a4dff);
-      color: #fff;
-      border: none;
       border-radius: 8px;
-      padding: 10px 18px;
-      font-size: 1rem;
+      border: none;
+      width: 90%;
+      font-size: 16px;
+    }
+    button {
+      background: linear-gradient(45deg, #ff00cc, #3333ff);
+      color: #fff;
       cursor: pointer;
       transition: 0.3s;
     }
-
     button:hover {
-      opacity: 0.85;
-    }
-
-    footer {
-      border-top: 1px solid #222;
-      padding: 20px;
-      color: #aaa;
-      font-size: 0.9rem;
-    }
-
-    .frete {
-      font-size: 0.95rem;
-      color: #ccc;
-      margin-bottom: 10px;
-    }
-
-    .frete-gratis {
-      color: #00ff99;
-      font-weight: bold;
-    }
-
-    /* Modal de resumo */
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: #161616;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      text-align: left;
-      color: #fff;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-    }
-
-    .modal-content h2 {
-      text-align: center;
-      margin-bottom: 15px;
-      color: #ff2ba6;
-    }
-
-    .modal-content p {
-      margin: 6px 0;
-    }
-
-    .modal-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .btn-secondary {
-      background: #333;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: linear-gradient(90deg, #ff2ba6, #7a4dff);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      cursor: pointer;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>⚡ Unique Thunder</h1>
-    <p class="subtitle">Estilo e atitude em cada detalhe</p>
-  </header>
+  <h1>⚡ Unique Thunder</h1>
+  <p>Estilo e atitude em cada detalhe</p>
 
-  <main>
-    <section class="grid" id="products">
-      <div class="card">
-        <div class="thumb">
-          <img src="assets/logo.svg" alt="Camisa Preta">
-        </div>
-        <h3>Camisa Preta Unique Thunder</h3>
-        <p class="price">R$ 129,90</p>
+  <div class="product">
+    <img src="https://i.imgur.com/wlHoYPR.png" alt="Camisa Preta">
+    <h2>Camisa Preta</h2>
+    <p><strong>R$ 99,90</strong></p>
 
-        <div class="size-options" id="sizes1">
-          <div class="size" onclick="selectSize('sizes1','P')">P</div>
-          <div class="size" onclick="selectSize('sizes1','M')">M</div>
-          <div class="size" onclick="selectSize('sizes1','G')">G</div>
-          <div class="size" onclick="selectSize('sizes1','GG')">GG</div>
-        </div>
+    <select id="size">
+      <option value="">Selecione o tamanho</option>
+      <option value="P">P</option>
+      <option value="M">M</option>
+      <option value="G">G</option>
+      <option value="GG">GG</option>
+    </select>
 
-        <input type="number" id="qty1" class="qty-input" value="1" min="1" max="10" />
-        <input type="text" id="cep1" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
-        <p id="frete1" class="frete"></p>
-        <button onclick="openResumo('Camisa Preta Unique Thunder', 129.90, 'cep1', 'frete1', 'sizes1', 'qty1')">Comprar agora</button>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    © <span id="year"></span> Unique Thunder — Todos os direitos reservados.
-  </footer>
-
-  <!-- Modal Resumo -->
-  <div class="modal" id="modalResumo">
-    <div class="modal-content">
-      <h2>Confirme seu pedido</h2>
-      <p><b>Produto:</b> <span id="rProduto"></span></p>
-      <p><b>Tamanho:</b> <span id="rTamanho"></span></p>
-      <p><b>Quantidade:</b> <span id="rQtd"></span></p>
-      <p><b>Frete:</b> <span id="rFrete"></span></p>
-      <p><b>Total:</b> <span id="rTotal"></span></p>
-      <div class="modal-buttons">
-        <button class="btn-secondary" onclick="closeResumo()">Voltar</button>
-        <button class="btn-primary" id="confirmarBtn">Confirmar e pagar</button>
-      </div>
-    </div>
+    <button onclick="buyProduct()">Comprar agora</button>
   </div>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-    const selectedSizes = {};
-    let pedidoAtual = {};
+    async function buyProduct() {
+      const size = document.getElementById("size").value;
+      if (!size) {
+        alert("Selecione um tamanho antes de continuar!");
+        return;
+      }
 
-    function selectSize(groupId, size) {
-      const group = document.getElementById(groupId);
-      [...group.children].forEach(el => el.classList.remove("active"));
-      const clicked = [...group.children].find(el => el.textContent === size);
-      if (clicked) clicked.classList.add("active");
-      selectedSizes[groupId] = size;
-    }
+      const product = "Camisa Preta";
+      const amount = 99.90;
 
-    function calcFrete(cep, totalProdutos) {
-      cep = cep.replace(/\D/g, "");
-      if (cep.length !== 8) return null;
-      if (totalProdutos >= 299) return 0;
-      const faixa1 = { inicio: 1000000, fim: 19999999, valor: 24.90 };
-      const faixa2 = { inicio: 20000000, fim: 39999999, valor: 29.90 };
-      const faixa3 = { inicio: 40000000, fim: 99999999, valor: 34.90 };
-      const cepNum = parseInt(cep, 10);
-      if (cepNum >= faixa1.inicio && cepNum <= faixa1.fim) return faixa1.valor;
-      if (cepNum >= faixa2.inicio && cepNum <= faixa2.fim) return faixa2.valor;
-      return faixa3.valor;
-    }
-
-    function openResumo(description, price, cepId, freteId, sizeGroup, qtyId) {
-      const cepInput = document.getElementById(cepId);
-      const freteEl = document.getElementById(freteId);
-      const qtyInput = document.getElementById(qtyId);
-      const cep = cepInput.value.trim();
-      const size = selectedSizes[sizeGroup];
-      const quantidade = parseInt(qtyInput.value) || 1;
-
-      if (!size) return alert("Escolha um tamanho antes de continuar.");
-      const totalProdutos = price * quantidade;
-      const valorFrete = calcFrete(cep, totalProdutos);
-      if (valorFrete === null) return alert("Digite um CEP válido.");
-
-      const freteTxt = valorFrete === 0 ? "Grátis 🚀" : "R$ " + valorFrete.toFixed(2);
-      const total = totalProdutos + valorFrete;
-
-      // Exibir no resumo
-      document.getElementById("rProduto").textContent = description;
-      document.getElementById("rTamanho").textContent = size;
-      document.getElementById("rQtd").textContent = quantidade;
-      document.getElementById("rFrete").textContent = freteTxt;
-      document.getElementById("rTotal").textContent = "R$ " + total.toFixed(2);
-
-      pedidoAtual = { description, size, quantidade, total };
-      document.getElementById("modalResumo").classList.add("active");
-
-      // botão confirmar
-      document.getElementById("confirmarBtn").onclick = () => confirmarPedido();
-    }
-
-    function closeResumo() {
-      document.getElementById("modalResumo").classList.remove("active");
-    }
-
-    async function confirmarPedido() {
-      closeResumo();
-      const descricaoCompleta = `${pedidoAtual.description} - Tam ${pedidoAtual.size} - Qtd ${pedidoAtual.quantidade}`;
       try {
-        const response = await fetch("/api/checkout", {
+        const response = await fetch("/api/create_preference", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description: descricaoCompleta, total: pedidoAtual.total })
+          body: JSON.stringify({ product, size, amount })
         });
+
         const data = await response.json();
-        if (data.init_point) {
-          window.location.href = data.init_point;
+
+        if (data.url) {
+          window.location.href = data.url;
         } else {
-          alert("Erro ao criar pagamento: " + (data.error || "verifique configuração"));
+          alert("Erro ao iniciar pagamento. Verifique a configuração.");
+          console.log(data);
         }
-      } catch (err) {
-        alert("Falha de conexão: " + err.message);
+      } catch (error) {
+        console.error("Erro ao conectar:", error);
+        alert("Erro ao conectar ao servidor de pagamento.");
       }
     }
   </script>
