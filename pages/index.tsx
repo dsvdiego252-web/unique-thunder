@@ -8,13 +8,13 @@ export default function Home() {
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
-      backgroundColor: '#111',
+      backgroundColor: '#0b0b0b',
       color: '#fff',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: 'Arial, sans-serif',
+      textAlign: 'center'
     }}>
       <h1>🦅 Unique Thunder</h1>
       <p>Loja oficial — em breve disponível!</p>
     </div>
   );
 }
-
