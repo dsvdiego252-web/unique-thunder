@@ -43,7 +43,7 @@
     }
     h2 { margin: 8px 0; font-size: 20px; }
     p { color: #bbb; margin: 4px 0 10px; }
-    select, button {
+    select, input, button {
       width: 90%;
       padding: 10px;
       border: none;
@@ -51,6 +51,7 @@
       margin: 8px 0;
       font-size: 16px;
     }
+    input { text-align: center; }
     button {
       background: linear-gradient(45deg, #ff00cc, #3333ff);
       color: #fff;
@@ -65,7 +66,7 @@
   <p>Estilo e atitude em cada detalhe</p>
 
   <div class="grid">
-    <!-- Camisa 1 -->
+    <!-- Produto -->
     <div class="product">
       <img src="https://i.imgur.com/wlHoYPR.png" alt="Camisa Preta" />
       <h2>Camisa Preta</h2>
@@ -75,10 +76,10 @@
         <option value="P">P</option><option value="M">M</option>
         <option value="G">G</option><option value="GG">GG</option>
       </select>
-      <button onclick="buyProduct('Camisa Preta', 99.90, 'size1')">Comprar agora</button>
+      <input id="cep1" type="text" maxlength="9" placeholder="Digite seu CEP" />
+      <button onclick="calcAndBuy('Camisa Preta', 99.90, 'size1', 'cep1')">Calcular frete e comprar</button>
     </div>
 
-    <!-- Camisa 2 -->
     <div class="product">
       <img src="https://i.imgur.com/q7kA3oF.png" alt="Camisa Branca" />
       <h2>Camisa Branca</h2>
@@ -88,10 +89,10 @@
         <option value="P">P</option><option value="M">M</option>
         <option value="G">G</option><option value="GG">GG</option>
       </select>
-      <button onclick="buyProduct('Camisa Branca', 109.90, 'size2')">Comprar agora</button>
+      <input id="cep2" type="text" maxlength="9" placeholder="Digite seu CEP" />
+      <button onclick="calcAndBuy('Camisa Branca', 109.90, 'size2', 'cep2')">Calcular frete e comprar</button>
     </div>
 
-    <!-- Camisa 3 -->
     <div class="product">
       <img src="https://i.imgur.com/DPz1cR9.png" alt="Camisa Exclusiva" />
       <h2>Camisa Exclusiva</h2>
@@ -101,36 +102,49 @@
         <option value="P">P</option><option value="M">M</option>
         <option value="G">G</option><option value="GG">GG</option>
       </select>
-      <button onclick="buyProduct('Camisa Exclusiva', 139.90, 'size3')">Comprar agora</button>
+      <input id="cep3" type="text" maxlength="9" placeholder="Digite seu CEP" />
+      <button onclick="calcAndBuy('Camisa Exclusiva', 139.90, 'size3', 'cep3')">Calcular frete e comprar</button>
     </div>
   </div>
 
   <script>
-    async function buyProduct(product, amount, sizeId) {
-      const size = document.getElementById(sizeId).value;
-      if (!size) {
-        alert("Selecione um tamanho antes de continuar!");
-        return;
+    function getShipping(cep, amount) {
+      cep = cep.replace(/\D/g, '');
+      const ranges = [
+        { start: 1000000, end: 19999999, price: 24.9, free: 349 },
+        { start: 20000000, end: 28999999, price: 29.9, free: 349 },
+        { start: 29000000, end: 39999999, price: 29.9, free: 349 },
+        { start: 40000000, end: 99999999, price: 34.9, free: 399 }
+      ];
+      for (const r of ranges) {
+        if (cep >= r.start && cep <= r.end)
+          return amount >= r.free ? 0 : r.price;
       }
+      return 39.9;
+    }
+
+    async function calcAndBuy(product, amount, sizeId, cepId) {
+      const size = document.getElementById(sizeId).value;
+      const cep = document.getElementById(cepId).value;
+      if (!size) return alert("Selecione um tamanho!");
+      if (!cep) return alert("Informe seu CEP!");
+
+      const shipping = getShipping(cep, amount);
+      if (shipping === 0) alert("Frete grátis para sua região!");
+      else alert(`Frete: R$ ${shipping.toFixed(2).replace('.', ',')}`);
 
       try {
-        const response = await fetch("/api/create_preference", {
+        const res = await fetch("/api/create_preference", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ product, size, amount }),
+          body: JSON.stringify({ product, size, amount, shipping, cep }),
         });
-
-        const data = await response.json();
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert("Erro ao iniciar pagamento. Verifique o console.");
-          console.error(data);
-        }
-      } catch (error) {
-        console.error("Erro:", error);
-        alert("Falha na comunicação com o servidor.");
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+        else console.error(data);
+      } catch (err) {
+        alert("Erro ao conectar ao servidor.");
+        console.error(err);
       }
     }
   </script>
