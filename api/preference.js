@@ -3,9 +3,10 @@ import fetch from "node-fetch";
 
 export default async function handler(req, res) {
   try {
-    const { product, size, amount } = JSON.parse(req.body);
+    const { product, size, amount, shipping, cep } = JSON.parse(req.body);
 
-    // Chamada à API do Mercado Pago para criar a preferência
+    const total = Number(amount) + Number(shipping);
+
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
             title: `${product} (${size})`,
             quantity: 1,
             currency_id: "BRL",
-            unit_price: Number(amount),
+            unit_price: Number(total.toFixed(2)),
           },
         ],
         back_urls: {
@@ -30,14 +31,10 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
-    if (data.init_point) {
-      res.status(200).json({ url: data.init_point });
-    } else {
-      throw new Error(JSON.stringify(data));
-    }
+    if (data.init_point) res.status(200).json({ url: data.init_point });
+    else throw new Error(JSON.stringify(data));
   } catch (error) {
-    console.error("Erro ao criar preferência:", error);
+    console.error("Erro ao criar pagamento:", error);
     res.status(500).json({ error: "Falha ao criar pagamento", details: error.message });
   }
 }
