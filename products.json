@@ -1,0 +1,38 @@
+[
+  {
+    "id": "tee-001",
+    "name": "Thunder Classic - Preta",
+    "price": 89.9,
+    "sizes": [
+      "P",
+      "M",
+      "G",
+      "GG"
+    ],
+    "image": "assets/logo.svg"
+  },
+  {
+    "id": "tee-002",
+    "name": "Thunder Neon - Branca",
+    "price": 94.9,
+    "sizes": [
+      "P",
+      "M",
+      "G",
+      "GG"
+    ],
+    "image": "assets/logo.svg"
+  },
+  {
+    "id": "tee-003",
+    "name": "Thunder Skull - Preta",
+    "price": 99.9,
+    "sizes": [
+      "P",
+      "M",
+      "G",
+      "GG"
+    ],
+    "image": "assets/logo.svg"
+  }
+]

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unique Thunder — Camisetas</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Unique Thunder — seu novo conceito de camisetas."/>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <img src="assets/logo.svg" width="36" height="36" alt="Unique Thunder logo"/>
+        <span>Unique Thunder</span>
+      </div>
+      <nav class="nav">
+        <a href="#produtos">Produtos</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <button id="cartButton" class="cart-btn" aria-label="Abrir carrinho">
+        🛒 <span id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Seu novo conceito de camiseta</h1>
+      <p>Estampas autorais, qualidade premium e envio para todo o Brasil.</p>
+      <a class="cta" href="#produtos">Ver coleção</a>
+    </section>
+
+    <section id="produtos" class="products">
+      <h2>Coleção</h2>
+      <div id="productGrid" class="grid"></div>
+    </section>
+
+    <section id="sobre" class="about">
+      <h2>Sobre a Unique Thunder</h2>
+      <p>Marca independente de camisetas com design original. Produção sob demanda e controle de qualidade rigoroso em cada peça.</p>
+    </section>
+
+    <section id="contato" class="contact">
+      <h2>Contato</h2>
+      <ul>
+        <li>Email: <a href="mailto:dsv.diego@hotmail.com">dsv.diego@hotmail.com</a></li>
+        <li>Instagram: <a href="https://www.instagram.com/useuniquethunder" target="_blank" rel="noopener">useuniquethunder</a></li>
+        <li>CEP de origem: 14412-466 (Franca/SP)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <span id="year"></span> Unique Thunder. Todos os direitos reservados.</small>
+    </div>
+  </footer>
+
+  <!-- Carrinho lateral -->
+  <aside id="cartPanel" class="cart-panel" aria-hidden="true">
+    <div class="cart-header">
+      <h3>Carrinho</h3>
+      <button id="closeCart" aria-label="Fechar carrinho">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-summary">
+      <div class="row">
+        <span>Subtotal</span><strong id="subtotal">R$ 0,00</strong>
+      </div>
+      <div class="row">
+        <label for="cep">CEP</label>
+        <input id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9">
+      </div>
+      <div class="row">
+        <span>Frete</span><strong id="frete">R$ 0,00</strong>
+      </div>
+      <div class="row total">
+        <span>Total</span><strong id="total">R$ 0,00</strong>
+      </div>
+      <button id="checkout" class="checkout-btn">Finalizar compra</button>
+    </div>
+  </aside>
+
+  <div id="backdrop" class="backdrop" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

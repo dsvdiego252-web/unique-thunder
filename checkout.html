@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Checkout — Unique Thunder</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <main class="container" style="padding: 40px 0;">
+    <a href="index.html" class="btn" style="margin-bottom:16px;">← Voltar à loja</a>
+    <h1>Checkout</h1>
+    <div id="resume" class="card" style="padding:16px; margin-top:12px;"></div>
+    <button id="pay" class="checkout-btn" style="margin-top:16px;">Pagar com Mercado Pago</button>
+  </main>
+  <script src="config.js"></script>
+  <script>
+    function fmt(n){return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+    const params = new URLSearchParams(window.location.search);
+    const dataParam = params.get('data');
+    let payload = null;
+    try{ payload = JSON.parse(decodeURIComponent(dataParam||'')); }catch(e){}
+    const resume = document.getElementById('resume');
+    if(!payload){
+      resume.innerHTML = '<p>Nenhum item no carrinho.</p>';
+      document.getElementById('pay').disabled = true;
+    }else{
+      const items = payload.cart.map(i => 
+        `<div class="row" style="justify-content:space-between"><span>${i.name} (${i.size})</span><strong>${fmt(i.price)}</strong></div>`
+      ).join('');
+      resume.innerHTML = `
+        <div class="row" style="justify-content:space-between"><span>Itens</span><span>Qtd: ${payload.cart.length}</span></div>
+        <div style="margin:10px 0">${items}</div>
+        <div class="row" style="justify-content:space-between"><span>Subtotal</span><strong>${fmt(payload.subtotal)}</strong></div>
+        <div class="row" style="justify-content:space-between"><span>Frete</span><strong>${fmt(payload.shipping)}</strong></div>
+        <div class="row total" style="justify-content:space-between"><span>Total</span><strong>${fmt(payload.total)}</strong></div>
+      `;
+      document.getElementById('pay').onclick = () => {
+        if(!PAYMENT_LINK){ alert('Configure o PAYMENT_LINK em config.js'); return; }
+        window.location.href = PAYMENT_LINK;
+      }
+    }
+  </script>
+</body>
+</html>
