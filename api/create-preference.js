@@ -6,51 +6,41 @@ export default async function handler(req, res) {
   }
 
   try {
-    const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-    if (!ACCESS_TOKEN) {
-      console.error("❌ MP_ACCESS_TOKEN ausente!");
+    const token = process.env.MP_ACCESS_TOKEN;
+    if (!token) {
       return res.status(500).json({ error: "Token do Mercado Pago ausente." });
     }
 
-    // Configura Mercado Pago
-    mercadopago.configure({ access_token: ACCESS_TOKEN });
+    mercadopago.configure({ access_token: token });
 
-    const { items, shipping_cost = 0, cep = "" } = req.body || {};
-    const baseUrl = `https://${req.headers.host}`;
+    const { items, total } = req.body;
 
-    // Cria a preferência de pagamento
-    const preference = {
+    const preference = await mercadopago.preferences.create({
       items: items?.length
         ? items.map(i => ({
             title: i.title,
             quantity: Number(i.quantity || 1),
             currency_id: "BRL",
             unit_price: Number(i.unit_price || 0),
-            picture_url: i.picture_url,
           }))
         : [
             {
-              title: "Compra na Unique Thunder",
+              title: "Compra Unique Thunder",
               quantity: 1,
               currency_id: "BRL",
-              unit_price: 0,
+              unit_price: Number(total || 0),
             },
           ],
-      shipments: { cost: Number(shipping_cost || 0), mode: "not_specified" },
       back_urls: {
-        success: `${baseUrl}/success.html`,
-        failure: `${baseUrl}/cancel.html`,
-        pending: `${baseUrl}/success.html`,
+        success: "https://unique-thunder.vercel.app/success.html",
+        failure: "https://unique-thunder.vercel.app/cancel.html",
       },
       auto_return: "approved",
-      metadata: { cep },
-    };
+    });
 
-    const result = await mercadopago.preferences.create(preference);
-    console.log("✅ Preferência criada com sucesso:", result.body.id);
-    return res.status(200).json(result.body);
-  } catch (error) {
-    console.error("❌ Erro ao criar preferência:", error);
-    return res.status(500).json({ error: error.message });
+    return res.status(200).json(preference.body);
+  } catch (err) {
+    console.error("Erro no servidor:", err);
+    return res.status(500).json({ error: err.message || "Erro interno" });
   }
 }
