@@ -1,1 +1,0 @@
-// API Mercado Pago + Melhor Envio (já definida anteriormente, substituída no deploy)
