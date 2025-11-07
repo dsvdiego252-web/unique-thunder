@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
+  "scripts": {
+    "start": "node api/create-preference.js"
+  },
   "dependencies": {
     "mercadopago": "^1.5.19"
   }
