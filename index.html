@@ -82,8 +82,29 @@
       margin-bottom: 10px;
     }
 
-    .cep-input {
-      margin: 15px 0;
+    .size-options {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .size {
+      background: #0f0f0f;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .size.active {
+      background: #ff2ba6;
+      border-color: #ff2ba6;
+    }
+
+    .cep-input, .qty-input {
       background: #0f0f0f;
       border: 1px solid #333;
       border-radius: 8px;
@@ -92,6 +113,7 @@
       width: 180px;
       font-size: 1rem;
       text-align: center;
+      margin: 10px 0;
     }
 
     button {
@@ -126,6 +148,67 @@
       color: #00ff99;
       font-weight: bold;
     }
+
+    /* Modal de resumo */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #161616;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      text-align: left;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+
+    .modal-content h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #ff2ba6;
+    }
+
+    .modal-content p {
+      margin: 6px 0;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .btn-secondary {
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #ff2ba6, #7a4dff);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -142,42 +225,18 @@
         </div>
         <h3>Camisa Preta Unique Thunder</h3>
         <p class="price">R$ 129,90</p>
+
+        <div class="size-options" id="sizes1">
+          <div class="size" onclick="selectSize('sizes1','P')">P</div>
+          <div class="size" onclick="selectSize('sizes1','M')">M</div>
+          <div class="size" onclick="selectSize('sizes1','G')">G</div>
+          <div class="size" onclick="selectSize('sizes1','GG')">GG</div>
+        </div>
+
+        <input type="number" id="qty1" class="qty-input" value="1" min="1" max="10" />
         <input type="text" id="cep1" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
         <p id="frete1" class="frete"></p>
-        <button onclick="buyProduct('Camisa Preta Unique Thunder', 129.90, 'cep1', 'frete1')">Comprar agora</button>
-      </div>
-
-      <div class="card">
-        <div class="thumb">
-          <img src="assets/logo.svg" alt="Moletom Thunder">
-        </div>
-        <h3>Moletom Thunder Premium</h3>
-        <p class="price">R$ 189,90</p>
-        <input type="text" id="cep2" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
-        <p id="frete2" class="frete"></p>
-        <button onclick="buyProduct('Moletom Thunder Premium', 189.90, 'cep2', 'frete2')">Comprar agora</button>
-      </div>
-
-      <div class="card">
-        <div class="thumb">
-          <img src="assets/logo.svg" alt="Boné Thunder">
-        </div>
-        <h3>Boné Thunder Snapback</h3>
-        <p class="price">R$ 99,90</p>
-        <input type="text" id="cep3" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
-        <p id="frete3" class="frete"></p>
-        <button onclick="buyProduct('Boné Thunder Snapback', 99.90, 'cep3', 'frete3')">Comprar agora</button>
-      </div>
-
-      <div class="card">
-        <div class="thumb">
-          <img src="assets/logo.svg" alt="Kit 3 Camisetas">
-        </div>
-        <h3>Kit 3 Camisetas Unique Thunder</h3>
-        <p class="price">R$ 329,90</p>
-        <input type="text" id="cep4" class="cep-input" placeholder="Digite seu CEP" maxlength="9" />
-        <p id="frete4" class="frete"></p>
-        <button onclick="buyProduct('Kit 3 Camisetas Unique Thunder', 329.90, 'cep4', 'frete4')">Comprar agora</button>
+        <button onclick="openResumo('Camisa Preta Unique Thunder', 129.90, 'cep1', 'frete1', 'sizes1', 'qty1')">Comprar agora</button>
       </div>
     </section>
   </main>
@@ -186,56 +245,92 @@
     © <span id="year"></span> Unique Thunder — Todos os direitos reservados.
   </footer>
 
+  <!-- Modal Resumo -->
+  <div class="modal" id="modalResumo">
+    <div class="modal-content">
+      <h2>Confirme seu pedido</h2>
+      <p><b>Produto:</b> <span id="rProduto"></span></p>
+      <p><b>Tamanho:</b> <span id="rTamanho"></span></p>
+      <p><b>Quantidade:</b> <span id="rQtd"></span></p>
+      <p><b>Frete:</b> <span id="rFrete"></span></p>
+      <p><b>Total:</b> <span id="rTotal"></span></p>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="closeResumo()">Voltar</button>
+        <button class="btn-primary" id="confirmarBtn">Confirmar e pagar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+    const selectedSizes = {};
+    let pedidoAtual = {};
 
-    // Cálculo de frete com regra de frete grátis
-    function calcFrete(cep, price) {
+    function selectSize(groupId, size) {
+      const group = document.getElementById(groupId);
+      [...group.children].forEach(el => el.classList.remove("active"));
+      const clicked = [...group.children].find(el => el.textContent === size);
+      if (clicked) clicked.classList.add("active");
+      selectedSizes[groupId] = size;
+    }
+
+    function calcFrete(cep, totalProdutos) {
       cep = cep.replace(/\D/g, "");
       if (cep.length !== 8) return null;
-
-      // Frete grátis acima de 299
-      if (price >= 299) return 0;
-
-      const faixa1 = { inicio: 1000000, fim: 19999999, valor: 24.90 }; // SP
-      const faixa2 = { inicio: 20000000, fim: 39999999, valor: 29.90 }; // RJ/MG
-      const faixa3 = { inicio: 40000000, fim: 99999999, valor: 34.90 }; // outros
-
+      if (totalProdutos >= 299) return 0;
+      const faixa1 = { inicio: 1000000, fim: 19999999, valor: 24.90 };
+      const faixa2 = { inicio: 20000000, fim: 39999999, valor: 29.90 };
+      const faixa3 = { inicio: 40000000, fim: 99999999, valor: 34.90 };
       const cepNum = parseInt(cep, 10);
       if (cepNum >= faixa1.inicio && cepNum <= faixa1.fim) return faixa1.valor;
       if (cepNum >= faixa2.inicio && cepNum <= faixa2.fim) return faixa2.valor;
       return faixa3.valor;
     }
 
-    async function buyProduct(description, price, cepId, freteId) {
+    function openResumo(description, price, cepId, freteId, sizeGroup, qtyId) {
       const cepInput = document.getElementById(cepId);
       const freteEl = document.getElementById(freteId);
+      const qtyInput = document.getElementById(qtyId);
       const cep = cepInput.value.trim();
+      const size = selectedSizes[sizeGroup];
+      const quantidade = parseInt(qtyInput.value) || 1;
 
-      const valorFrete = calcFrete(cep, price);
-      if (valorFrete === null) {
-        alert("Por favor, digite um CEP válido antes de continuar.");
-        return;
-      }
+      if (!size) return alert("Escolha um tamanho antes de continuar.");
+      const totalProdutos = price * quantidade;
+      const valorFrete = calcFrete(cep, totalProdutos);
+      if (valorFrete === null) return alert("Digite um CEP válido.");
 
-      // Exibir mensagem do frete
-      if (valorFrete === 0) {
-        freteEl.innerHTML = "<span class='frete-gratis'>Frete grátis 🚀</span>";
-      } else {
-        freteEl.textContent = "Frete: R$ " + valorFrete.toFixed(2);
-      }
+      const freteTxt = valorFrete === 0 ? "Grátis 🚀" : "R$ " + valorFrete.toFixed(2);
+      const total = totalProdutos + valorFrete;
 
-      const total = price + valorFrete;
+      // Exibir no resumo
+      document.getElementById("rProduto").textContent = description;
+      document.getElementById("rTamanho").textContent = size;
+      document.getElementById("rQtd").textContent = quantidade;
+      document.getElementById("rFrete").textContent = freteTxt;
+      document.getElementById("rTotal").textContent = "R$ " + total.toFixed(2);
 
+      pedidoAtual = { description, size, quantidade, total };
+      document.getElementById("modalResumo").classList.add("active");
+
+      // botão confirmar
+      document.getElementById("confirmarBtn").onclick = () => confirmarPedido();
+    }
+
+    function closeResumo() {
+      document.getElementById("modalResumo").classList.remove("active");
+    }
+
+    async function confirmarPedido() {
+      closeResumo();
+      const descricaoCompleta = `${pedidoAtual.description} - Tam ${pedidoAtual.size} - Qtd ${pedidoAtual.quantidade}`;
       try {
         const response = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description, total })
+          body: JSON.stringify({ description: descricaoCompleta, total: pedidoAtual.total })
         });
-
         const data = await response.json();
-
         if (data.init_point) {
           window.location.href = data.init_point;
         } else {
