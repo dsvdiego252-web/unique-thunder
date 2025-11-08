@@ -7,7 +7,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "mercadopago": "^2.0.6"
+    "mercadopago": "^1.5.17"
   },
   "engines": {
     "node": "22.x"
