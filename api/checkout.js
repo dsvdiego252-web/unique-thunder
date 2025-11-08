@@ -6,50 +6,54 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { items = [], shipping_cost = 0, cep = "" } = req.body || {};
+
     const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
     if (!ACCESS_TOKEN) {
       return res.status(500).json({ error: "MP_ACCESS_TOKEN não configurado" });
     }
 
-    mercadopago.configure({ access_token: ACCESS_TOKEN });
-
-    const { items = [], shipping_cost = 0, cep = "" } = req.body || {};
+    // Configura SDK Mercado Pago
+    mercadopago.configure({
+      access_token: ACCESS_TOKEN
+    });
 
     const host = req.headers["x-forwarded-host"] || req.headers.host;
     const proto = req.headers["x-forwarded-proto"] || "https";
     const baseUrl = `${proto}://${host}`;
 
+    // Cria a preferência de pagamento
     const preference = await mercadopago.preferences.create({
       items: items.map((item) => ({
-        title: item.title || "Produto Unique Thunder",
+        id: item.id,
+        title: item.title,
         quantity: Number(item.quantity || 1),
         currency_id: "BRL",
         unit_price: Number(item.unit_price || 0),
-        picture_url: item.picture_url,
+        picture_url: item.picture_url
       })),
       shipments: {
         cost: Number(shipping_cost || 0),
-        mode: "not_specified",
+        mode: "not_specified"
       },
       back_urls: {
         success: `${baseUrl}/success.html`,
         failure: `${baseUrl}/cancel.html`,
-        pending: `${baseUrl}/success.html`,
+        pending: `${baseUrl}/success.html`
       },
       auto_return: "approved",
       statement_descriptor: "UNIQUE THUNDER",
-      metadata: { cep },
+      metadata: { cep }
     });
 
     return res.status(200).json({
       init_point: preference.body.init_point,
-      id: preference.body.id,
+      id: preference.body.id
     });
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);
-    return res.status(500).json({
-      error: "Erro ao criar pagamento",
-      details: error.message,
-    });
+    return res
+      .status(500)
+      .json({ error: "Erro ao criar pagamento", details: error.message });
   }
 }
