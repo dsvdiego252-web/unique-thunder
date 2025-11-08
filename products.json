@@ -1,19 +1,18 @@
-
 [
   {
-    "id": "camisa-unique-thunder-preta",
+    "id": 1,
     "title": "Camisa Unique Thunder Preta",
-    "description": "Camisa premium 30.1, silk DTF de alta definição. Modelagem streetwear.",
-    "unit_price": 119.90,
-    "picture_url": "/assets/camisa-preta.jpg",
-    "sizes": ["P", "M", "G", "GG"]
+    "description": "Algodão premium 30.1.",
+    "unit_price": 119.9,
+    "sizes": ["P", "M", "G", "GG"],
+    "picture_url": "assets/camisa-preta.jpg"
   },
   {
-    "id": "camisa-unique-thunder-branca",
+    "id": 2,
     "title": "Camisa Unique Thunder Branca",
-    "description": "Camisa premium 30.1, silk DTF de alta definição. Modelagem streetwear.",
-    "unit_price": 119.90,
-    "picture_url": "/assets/camisa-branca.jpg",
-    "sizes": ["P", "M", "G", "GG"]
+    "description": "Estilo urbano com toque minimalista.",
+    "unit_price": 119.9,
+    "sizes": ["P", "M", "G", "GG"],
+    "picture_url": "assets/camisa-branca.jpg"
   }
 ]
