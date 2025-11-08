@@ -2,9 +2,13 @@
   "name": "unique-thunder",
   "version": "1.0.0",
   "main": "app.js",
-  "scripts": { "start": "node app.js" },
-  "dependencies": {
-    "mercadopago-sdk": "^2.0.6"
+  "scripts": {
+    "start": "node app.js"
   },
-  "engines": { "node": "22.x" }
+  "dependencies": {
+    "mercadopago": "^1.5.20"
+  },
+  "engines": {
+    "node": "22.x"
+  }
 }
