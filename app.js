@@ -1,188 +1,142 @@
-const els = {
-  grid: document.querySelector("#produtos"),
-  modal: document.querySelector("#quickModal"),
-  modalImg: document.querySelector("#modalImg"),
-  modalTitle: document.querySelector("#modalTitle"),
-  modalDesc: document.querySelector("#modalDesc"),
-  modalPrice: document.querySelector("#modalPrice"),
-  sizeGroup: document.querySelector("#sizeGroup"),
-  qtyInput: document.querySelector("#qty"),
-  addToCart: document.querySelector("#addToCart"),
-  closeModal: document.querySelector("#closeModal"),
+// ==============================
+// Unique Thunder - Frontend App
+// ==============================
 
-  cart: document.querySelector("#cartDrawer"),
-  btnCart: document.querySelector("#btnCart"),
-  closeCart: document.querySelector("#closeCart"),
-  cartItems: document.querySelector("#cartItems"),
-  cartCount: document.querySelector("#cartCount"),
-  subTotal: document.querySelector("#subTotal"),
-  shipTotal: document.querySelector("#shipTotal"),
-  grandTotal: document.querySelector("#grandTotal"),
-  cep: document.querySelector("#cep"),
-  btnCheckout: document.querySelector("#btnCheckout")
-};
+// Carrinho local
+let cart = [];
 
-let PRODUCTS = [];
-let CART = [];
-let current = null; // produto selecionado (modal)
-
-// Carrega produtos
-async function load() {
-  const res = await fetch("./products.json");
-  PRODUCTS = await res.json();
-  renderGrid(PRODUCTS);
-}
-load();
-
-function renderGrid(list) {
-  els.grid.innerHTML = list.map(p => cardHTML(p)).join("");
-  // bind
-  document.querySelectorAll(".btn-buy").forEach(btn => {
-    btn.addEventListener("click", () => openModal(btn.dataset.id));
-  });
+// Função para adicionar produto ao carrinho
+function addToCart(product) {
+  const existing = cart.find(p => p.id === product.id && p.size === product.size);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  renderCart();
 }
 
-function cardHTML(p) {
-  return `
-    <article class="card">
-      <img src="${p.image}" alt="${p.title}">
-      <div class="inner">
-        <h3>${p.title}</h3>
-        <p class="muted">${p.desc}</p>
-        <div class="price">${real(p.price)}</div>
-        <div class="actions">
-          <button class="btn-primary btn-buy" data-id="${p.id}">Escolher tamanho</button>
+// Renderiza o carrinho lateral
+function renderCart() {
+  const cartContainer = document.querySelector("#cartItems");
+  const subtotalEl = document.querySelector("#subtotal");
+  const freteEl = document.querySelector("#freteTotal");
+  const totalEl = document.querySelector("#total");
+  
+  cartContainer.innerHTML = "";
+  let subtotal = 0;
+
+  cart.forEach(item => {
+    subtotal += item.unit_price * item.qty;
+
+    const div = document.createElement("div");
+    div.classList.add("cart-item");
+    div.innerHTML = `
+      <div class="cart-item-info">
+        <img src="${item.picture_url}" alt="${item.title}" />
+        <div>
+          <strong>${item.title}</strong>
+          <p>Tam: ${item.size || "-"}</p>
+          <p>Qtd: ${item.qty}</p>
         </div>
       </div>
-    </article>`;
+      <span>R$ ${(item.unit_price * item.qty).toFixed(2)}</span>
+    `;
+    cartContainer.appendChild(div);
+  });
+
+  const frete = Number(freteEl?.dataset.valor || 0);
+  subtotalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
+  totalEl.textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
 }
 
-// Modal
-function openModal(id) {
-  current = PRODUCTS.find(x => x.id === id);
-  if (!current) return;
-  els.modalImg.src = current.image;
-  els.modalTitle.textContent = current.title;
-  els.modalDesc.textContent = current.desc;
-  els.modalPrice.textContent = real(current.price);
-  els.qtyInput.value = 1;
-  els.sizeGroup.innerHTML = current.sizes.map((s,i) =>
-    `<button class="size ${i===0?"active":""}" data-size="${s}">${s}</button>`
-  ).join("");
-  els.modal.classList.add("open");
+// Calcula frete com base no CEP (usa sua config.js)
+async function calcularFrete() {
+  const cepInput = document.querySelector("#cep");
+  const freteEl = document.querySelector("#freteTotal");
 
-  els.sizeGroup.querySelectorAll(".size").forEach(b=>{
-    b.addEventListener("click", ()=>{
-      els.sizeGroup.querySelectorAll(".size").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-    });
-  });
-}
-els.closeModal.addEventListener("click", ()=> els.modal.classList.remove("open"));
-document.addEventListener("keydown", e=>{
-  if(e.key==="Escape") { els.modal.classList.remove("open"); els.cart.classList.remove("open");}
-});
-document.querySelectorAll(".qty-btn").forEach(b=>{
-  b.addEventListener("click", ()=>{
-    const act=b.dataset.act;
-    let v = Number(els.qtyInput.value||1);
-    v = act==="inc" ? v+1 : Math.max(1,v-1);
-    els.qtyInput.value = v;
-  });
-});
+  if (!cepInput.value) return;
+  const cep = cepInput.value.replace(/\D/g, "");
 
-els.addToCart.addEventListener("click", ()=>{
-  const size = (els.sizeGroup.querySelector(".active")||{}).dataset?.size;
-  const qty = Math.max(1, Number(els.qtyInput.value||1));
-  if(!current || !size) return;
-
-  const key = `${current.id}_${size}`;
-  const found = CART.find(i=>i.key===key);
-  if(found) found.qty += qty;
-  else CART.push({ key, id:current.id, title:current.title, price:current.price, image:current.image, size, qty });
-
-  els.modal.classList.remove("open");
-  openCart();
-  saveCart();
+  // tabela configurada no config.js
+  const valor = calcularFretePorCep(cep);
+  freteEl.textContent = `R$ ${valor.toFixed(2)}`;
+  freteEl.dataset.valor = valor;
   renderCart();
-});
-
-// Carrinho
-function openCart(){ els.cart.classList.add("open"); }
-function closeCart(){ els.cart.classList.remove("open"); }
-els.btnCart.addEventListener("click", openCart);
-els.closeCart.addEventListener("click", closeCart);
-
-function renderCart(){
-  if(!CART.length){
-    els.cartItems.innerHTML = `<p class="muted">Seu carrinho está vazio.</p>`;
-  } else {
-    els.cartItems.innerHTML = CART.map(item => `
-      <div class="cart-item">
-        <img src="${item.image}" alt="${item.title}">
-        <div>
-          <h4>${item.title}</h4>
-          <small>Tam. ${item.size} &nbsp; • &nbsp; ${item.qty}x</small>
-          <div class="price">${real(item.price * item.qty)}</div>
-        </div>
-        <button class="rm" data-key="${item.key}">Remover</button>
-      </div>`).join("");
-    els.cartItems.querySelectorAll(".rm").forEach(b=>{
-      b.addEventListener("click", ()=>{
-        CART = CART.filter(i=>i.key!==b.dataset.key);
-        saveCart(); renderCart();
-      });
-    });
-  }
-  const subtotal = CART.reduce((s,i)=>s+i.price*i.qty,0);
-  els.subTotal.textContent = real(subtotal);
-
-  const cep = els.cep.value || "";
-  const ship = calcShipping(cep, subtotal);
-  els.shipTotal.textContent = real(ship);
-  els.grandTotal.textContent = real(subtotal + ship);
-  els.cartCount.textContent = String(CART.reduce((s,i)=>s+i.qty,0));
 }
-els.cep.addEventListener("input", ()=> renderCart());
 
-// Persistência simples
-function saveCart(){ localStorage.setItem("UT_CART", JSON.stringify(CART)); }
-function loadCart(){ try{ CART = JSON.parse(localStorage.getItem("UT_CART")||"[]"); }catch{CART=[]} }
-loadCart(); renderCart();
+// Busca frete conforme as faixas configuradas
+function calcularFretePorCep(cep) {
+  if (!window.SHIP_TABLE || !Array.isArray(window.SHIP_TABLE)) return 39.9;
+  const faixa = window.SHIP_TABLE.find(f =>
+    cep >= f.cep_start.replace("-", "") && cep <= f.cep_end.replace("-", "")
+  );
+  return faixa ? faixa.price : window.DEFAULT_SHIP_PRICE || 39.9;
+}
 
-// Checkout via função serverless
-els.btnCheckout.addEventListener("click", async ()=>{
-  if(!CART.length) return alert("Seu carrinho está vazio.");
-
-  const items = CART.map(i=>({
-    id: i.id,
-    title: `${i.title} (Tam ${i.size})`,
-    quantity: i.qty,
-    unit_price: i.price,
-    picture_url: new URL(i.image, location.href).href
-  }));
-
-  const subtotal = CART.reduce((s,i)=>s+i.price*i.qty,0);
-  const shipping = calcShipping(els.cep.value || "", subtotal);
-
-  try{
-    const res = await fetch("/api/create-preference",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        items,
-        shipping_cost: shipping,
-        cep: els.cep.value || ""
-      })
-    });
-    if(!res.ok){
-      const txt = await res.text();
-      throw new Error(txt);
+// ==============================
+// 🧾 FINALIZAR COMPRA (PIX + CARTÃO)
+// ==============================
+async function finalizarCompra() {
+  try {
+    if (cart.length === 0) {
+      alert("Seu carrinho está vazio!");
+      return;
     }
-    const data = await res.json();
-    // redireciona para o Checkout Pro
-    location.href = data.init_point || data.sandbox_init_point;
-  }catch(err){
-    alert("Falha na conexão: "+ (err?.message || err));
+
+    const cep = (document.querySelector("#cep")?.value || "").replace(/\D/g, "");
+    const frete = Number(document.querySelector("#freteTotal")?.dataset?.valor || 0);
+
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cart.map(p => ({
+          id: p.id,
+          title: `${p.title} - Tam ${p.size || "M"}`,
+          quantity: p.qty,
+          unit_price: p.unit_price,
+          picture_url: p.picture_url,
+        })),
+        shipping_cost: frete,
+        cep,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.init_point) {
+      console.error("Erro no checkout:", data);
+      alert("Não foi possível iniciar o pagamento. Tente novamente.");
+      return;
+    }
+
+    // Redireciona pro Mercado Pago (PIX + cartão)
+    window.location.href = data.init_point;
+  } catch (err) {
+    console.error("Erro geral:", err);
+    alert("Falha ao processar o pagamento.");
   }
+}
+
+// ==============================
+// Inicialização
+// ==============================
+
+// Liga eventos
+document.querySelector("#btnFinish")?.addEventListener("click", finalizarCompra);
+document.querySelector("#cep")?.addEventListener("blur", calcularFrete);
+
+// Exemplo de produto padrão (teste rápido)
+window.addEventListener("DOMContentLoaded", () => {
+  // Preenche exemplo se carrinho estiver vazio
+  if (cart.length === 0) {
+    addToCart({
+      id: "camisa-unique-thunder-preta",
+      title: "Camisa Unique Thunder Preta",
+      size: "M",
+      unit_price: 119.9,
+      picture_url: "/assets/camisa-preta.jpg"
+    });
+  }
+  renderCart();
 });
