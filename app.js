@@ -1,142 +1,153 @@
 // ==============================
-// Unique Thunder - Frontend App
+// Unique Thunder - App Principal
 // ==============================
 
-// Carrinho local
+// Carrinho
 let cart = [];
 
-// Função para adicionar produto ao carrinho
-function addToCart(product) {
-  const existing = cart.find(p => p.id === product.id && p.size === product.size);
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    cart.push({ ...product, qty: 1 });
+// ==============================
+// Carregar produtos dinamicamente
+// ==============================
+async function carregarProdutos() {
+  const container = document.querySelector("#produtos");
+  if (!container) return;
+
+  try {
+    const response = await fetch("products.json");
+    const produtos = await response.json();
+
+    container.innerHTML = "";
+
+    produtos.forEach((p) => {
+      const card = document.createElement("div");
+      card.classList.add("produto-card");
+
+      const tamanhos = p.sizes
+        .map((t) => `<option value="${t}">${t}</option>`)
+        .join("");
+
+      card.innerHTML = `
+        <img src="${p.picture_url}" alt="${p.title}" class="produto-imagem" />
+        <h3>${p.title}</h3>
+        <p>${p.description}</p>
+        <strong>R$ ${p.unit_price.toFixed(2)}</strong>
+
+        <div class="produto-tamanho">
+          <label for="tamanho-${p.id}">Tamanho:</label>
+          <select id="tamanho-${p.id}">
+            ${tamanhos}
+          </select>
+        </div>
+
+        <button class="btn-comprar" onclick='adicionarAoCarrinho(${JSON.stringify(
+          p
+        )})'>Adicionar ao carrinho</button>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar produtos:", err);
   }
-  renderCart();
 }
 
-// Renderiza o carrinho lateral
-function renderCart() {
-  const cartContainer = document.querySelector("#cartItems");
-  const subtotalEl = document.querySelector("#subtotal");
-  const freteEl = document.querySelector("#freteTotal");
-  const totalEl = document.querySelector("#total");
-  
-  cartContainer.innerHTML = "";
+// ==============================
+// Adicionar ao carrinho
+// ==============================
+function adicionarAoCarrinho(produto) {
+  const tamanhoSelecionado = document.querySelector(
+    `#tamanho-${produto.id}`
+  )?.value;
+
+  const item = {
+    ...produto,
+    size: tamanhoSelecionado || "Único",
+    quantity: 1,
+  };
+
+  cart.push(item);
+  atualizarCarrinho();
+}
+
+// ==============================
+// Atualizar exibição do carrinho
+// ==============================
+function atualizarCarrinho() {
+  const lista = document.querySelector("#cart-items");
+  const total = document.querySelector("#cart-total");
+
+  if (!lista || !total) return;
+
+  lista.innerHTML = "";
   let subtotal = 0;
 
-  cart.forEach(item => {
-    subtotal += item.unit_price * item.qty;
-
-    const div = document.createElement("div");
-    div.classList.add("cart-item");
-    div.innerHTML = `
-      <div class="cart-item-info">
-        <img src="${item.picture_url}" alt="${item.title}" />
-        <div>
-          <strong>${item.title}</strong>
-          <p>Tam: ${item.size || "-"}</p>
-          <p>Qtd: ${item.qty}</p>
-        </div>
-      </div>
-      <span>R$ ${(item.unit_price * item.qty).toFixed(2)}</span>
+  cart.forEach((item, index) => {
+    subtotal += item.unit_price * item.quantity;
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${item.title} (${item.size}) - R$ ${item.unit_price.toFixed(2)}
+      <button class="btn-remover" onclick="removerItem(${index})">Remover</button>
     `;
-    cartContainer.appendChild(div);
+    lista.appendChild(li);
   });
 
-  const frete = Number(freteEl?.dataset.valor || 0);
-  subtotalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
-  totalEl.textContent = `R$ ${(subtotal + frete).toFixed(2)}`;
-}
-
-// Calcula frete com base no CEP (usa sua config.js)
-async function calcularFrete() {
-  const cepInput = document.querySelector("#cep");
-  const freteEl = document.querySelector("#freteTotal");
-
-  if (!cepInput.value) return;
-  const cep = cepInput.value.replace(/\D/g, "");
-
-  // tabela configurada no config.js
-  const valor = calcularFretePorCep(cep);
-  freteEl.textContent = `R$ ${valor.toFixed(2)}`;
-  freteEl.dataset.valor = valor;
-  renderCart();
-}
-
-// Busca frete conforme as faixas configuradas
-function calcularFretePorCep(cep) {
-  if (!window.SHIP_TABLE || !Array.isArray(window.SHIP_TABLE)) return 39.9;
-  const faixa = window.SHIP_TABLE.find(f =>
-    cep >= f.cep_start.replace("-", "") && cep <= f.cep_end.replace("-", "")
-  );
-  return faixa ? faixa.price : window.DEFAULT_SHIP_PRICE || 39.9;
+  total.textContent = `Total: R$ ${subtotal.toFixed(2)}`;
 }
 
 // ==============================
-// 🧾 FINALIZAR COMPRA (PIX + CARTÃO)
+// Remover item do carrinho
+// ==============================
+function removerItem(index) {
+  cart.splice(index, 1);
+  atualizarCarrinho();
+}
+
+// ==============================
+// Finalizar compra (Mercado Pago)
 // ==============================
 async function finalizarCompra() {
+  if (cart.length === 0) {
+    alert("Seu carrinho está vazio.");
+    return;
+  }
+
   try {
-    if (cart.length === 0) {
-      alert("Seu carrinho está vazio!");
-      return;
-    }
-
-    const cep = (document.querySelector("#cep")?.value || "").replace(/\D/g, "");
-    const frete = Number(document.querySelector("#freteTotal")?.dataset?.valor || 0);
-
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        items: cart.map(p => ({
-          id: p.id,
-          title: `${p.title} - Tam ${p.size || "M"}`,
-          quantity: p.qty,
-          unit_price: p.unit_price,
-          picture_url: p.picture_url,
+        items: cart.map((item) => ({
+          title: item.title,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
         })),
-        shipping_cost: frete,
-        cep,
+        total: cart.reduce(
+          (acc, item) => acc + item.unit_price * item.quantity,
+          0
+        ),
       }),
     });
 
     const data = await response.json();
-    if (!response.ok || !data.init_point) {
-      console.error("Erro no checkout:", data);
-      alert("Não foi possível iniciar o pagamento. Tente novamente.");
-      return;
-    }
 
-    // Redireciona pro Mercado Pago (PIX + cartão)
-    window.location.href = data.init_point;
-  } catch (err) {
-    console.error("Erro geral:", err);
-    alert("Falha ao processar o pagamento.");
+    if (data.init_point) {
+      window.location.href = data.init_point; // Redireciona para o Mercado Pago
+    } else {
+      alert("Erro ao iniciar o pagamento. Tente novamente.");
+      console.error("Resposta inesperada:", data);
+    }
+  } catch (error) {
+    console.error("Erro ao finalizar compra:", error);
+    alert("Falha na conexão com o servidor.");
   }
 }
 
 // ==============================
-// Inicialização
+// Inicializar ao carregar a página
 // ==============================
-
-// Liga eventos
-document.querySelector("#btnFinish")?.addEventListener("click", finalizarCompra);
-document.querySelector("#cep")?.addEventListener("blur", calcularFrete);
-
-// Exemplo de produto padrão (teste rápido)
 window.addEventListener("DOMContentLoaded", () => {
-  // Preenche exemplo se carrinho estiver vazio
-  if (cart.length === 0) {
-    addToCart({
-      id: "camisa-unique-thunder-preta",
-      title: "Camisa Unique Thunder Preta",
-      size: "M",
-      unit_price: 119.9,
-      picture_url: "/assets/camisa-preta.jpg"
-    });
-  }
-  renderCart();
+  carregarProdutos();
+
+  const btnFinalizar = document.querySelector("#btn-finalizar");
+  if (btnFinalizar) btnFinalizar.addEventListener("click", finalizarCompra);
 });
