@@ -1,11 +1,13 @@
 {
   "name": "unique-thunder",
   "version": "1.0.0",
+  "description": "Loja Unique Thunder com integração Mercado Pago",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "mercadopago": "^1.6.8"
+    "mercadopago": "1.5.19"
   },
   "engines": {
     "node": "22.x"
