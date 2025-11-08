@@ -1,83 +1,69 @@
-// api/checkout.js
-/**
- * Checkout redirect (Mercado Pago) — PIX + Cartão, sem boleto
- * Requer no Vercel:
- *  - MP_ACCESS_TOKEN (seu access token de produção)
- */
+import mercadopago from "mercadopago";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
   }
 
   try {
-    const { items = [], shipping_cost = 0, cep = "" } = req.body || {};
-
+    // ✅ Verifica e carrega o token do ambiente
     const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
     if (!ACCESS_TOKEN) {
-      return res.status(500).json({ error: "MP_ACCESS_TOKEN não configurado" });
+      console.error("MP_ACCESS_TOKEN ausente nas variáveis de ambiente");
+      return res.status(500).json({ error: "Token de acesso não configurado" });
     }
 
-    // Detecta a URL base do seu deploy (https://...vercel.app)
+    mercadopago.configure({ access_token: ACCESS_TOKEN });
+
+    // ✅ Recebe dados do front
+    const { items, shipping_cost, cep } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: "Nenhum item recebido" });
+    }
+
+    // ✅ Detecta automaticamente o domínio da Vercel
     const host = req.headers["x-forwarded-host"] || req.headers.host;
     const proto = req.headers["x-forwarded-proto"] || "https";
     const baseUrl = `${proto}://${host}`;
 
-    // Monta preferência no endpoint oficial (sem depender de pacote NPM na build)
-    const prefRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+    // ✅ Cria a preferência no Mercado Pago
+    const preference = await mercadopago.preferences.create({
+      items: items.map((item) => ({
+        title: item.title,
+        quantity: Number(item.quantity || 1),
+        currency_id: "BRL",
+        unit_price: Number(item.unit_price),
+        picture_url: item.picture_url || "",
+      })),
+      shipments: {
+        cost: Number(shipping_cost || 0),
+        mode: "not_specified",
       },
-      body: JSON.stringify({
-        items: items.map((it) => ({
-          id: String(it.id || "sku"),
-          title: String(it.title || "Produto"),
-          quantity: Number(it.quantity || 1),
-          currency_id: "BRL",
-          unit_price: Number(it.unit_price || 0),
-          picture_url: it.picture_url || undefined,
-        })),
-        shipments: {
-          cost: Number(shipping_cost || 0),
-          mode: "not_specified",
-        },
-        back_urls: {
-          success: `${baseUrl}/success.html`,
-          failure: `${baseUrl}/cancel.html`,
-          pending: `${baseUrl}/success.html`,
-        },
-        auto_return: "approved",
-        statement_descriptor: "UNIQUE THUNDER",
-        metadata: { cep },
-
-        // Habilita apenas PIX + Cartão (exclui boleto)
-        payment_methods: {
-          excluded_payment_types: [{ id: "ticket" }], // boleto = "ticket"
-          installments: 12, // máx. parcelas (ajuste se quiser)
-        },
-
-        // Recomendações de segurança/UX:
-        binary_mode: false,
-        external_reference: `UT-${Date.now()}`,
-      }),
+      payment_methods: {
+        excluded_payment_types: [{ id: "ticket" }], // 🚫 Remove boleto
+        installments: 12,
+      },
+      back_urls: {
+        success: `${baseUrl}/success.html`,
+        failure: `${baseUrl}/cancel.html`,
+        pending: `${baseUrl}/success.html`,
+      },
+      auto_return: "approved",
+      statement_descriptor: "UNIQUE THUNDER",
+      metadata: { cep },
     });
 
-    if (!prefRes.ok) {
-      const txt = await prefRes.text();
-      console.error("MP Pref Error:", txt);
-      return res.status(prefRes.status).json({ error: "Falha ao criar preferência" });
-    }
-
-    const preference = await prefRes.json();
-
+    // ✅ Retorna link de pagamento
     return res.status(200).json({
-      id: preference.id,
-      init_point: preference.init_point,            // web
-      sandbox_init_point: preference.sandbox_init_point,
+      init_point: preference.body.init_point,
+      id: preference.body.id,
     });
-  } catch (err) {
-    console.error("Erro ao criar pagamento:", err);
-    return res.status(500).json({ error: "Erro ao criar pagamento" });
+  } catch (error) {
+    console.error("Erro ao criar pagamento:", error);
+    return res.status(500).json({
+      error: "Erro ao criar pagamento",
+      details: error.message,
+    });
   }
 }
